@@ -10,7 +10,8 @@
 ![Astro](https://img.shields.io/badge/Astro-5-ff5a03?logo=astro&logoColor=white&labelColor=0e0e0e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white&labelColor=0e0e0e)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?logo=tailwindcss&logoColor=white&labelColor=0e0e0e)
-![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white&labelColor=0e0e0e)
+![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white&labelColor=0e0e0e)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white&labelColor=0e0e0e)
 
 **Live:** [fransuelton.dev](https://fransuelton.dev)
 
@@ -20,16 +21,19 @@
 
 ## Tech Stack
 
-| Layer              | Technologies                                  |
-| ------------------ | --------------------------------------------- |
-| Framework          | Astro 5 (SSG)                                 |
-| Styling            | Tailwind CSS v4 + CSS custom properties       |
-| Language           | TypeScript                                    |
-| UI Islands         | React 19 (`client:load`)                      |
-| Fonts              | Inter + JetBrains Mono via Fontsource         |
-| Icons              | Lucide React                                  |
-| Package Manager    | Bun                                           |
-| Analytics          | Cloudflare Web Analytics (opt-in)             |
+| Layer              | Technologies                                        |
+| ------------------ | --------------------------------------------------- |
+| Framework          | Astro 5 — prerendered pages + one SSR API route      |
+| Hosting            | Cloudflare Workers (`@astrojs/cloudflare`)          |
+| Styling            | Tailwind CSS v4 + CSS custom properties             |
+| Language           | TypeScript                                          |
+| UI Islands         | React 18 (`client:idle`)                            |
+| Contact backend    | Astro API route + Resend                            |
+| OG images          | `astro-og-canvas` (generated at build)              |
+| Fonts              | Inter + JetBrains Mono via Fontsource               |
+| Icons              | Lucide React                                        |
+| Package Manager    | Bun                                                 |
+| Analytics          | Cloudflare Web Analytics (opt-in)                   |
 
 ---
 
@@ -43,9 +47,11 @@
 - **Scrollspy** — Active nav link highlight based on visible section
 - **Toast System** — Global `window.toast()` used by contact form and copy actions
 - **Spotlight Effect** — Radial gradient that follows the cursor on service and project cards
-- **PWA** — Installable via `manifest.webmanifest`
+- **Web App Manifest** — `manifest.webmanifest` (SVG icon only; add 192/512 PNG icons for real Android installability)
 - **Custom 404** — Branded page with character scramble animation
 - **SEO** — Canonical URLs, hreflang, OG/Twitter tags, JSON-LD structured data, sitemap
+- **OG Images** — One 1200×630 card per page × language, rendered at build time
+- **Rate Limiting** — Per-IP throttle on the contact endpoint (Cloudflare `ratelimits` binding)
 
 ---
 
@@ -71,19 +77,32 @@ bun run preview   # serve the production build locally
 
 ### Environment variables
 
-Copy `.env.example` to `.env.local` and fill in the values:
+There are two kinds, and they are set in different places.
+
+**Build-time (public, baked into the client bundle)** — copy `.env.example` to `.env`:
 
 ```env
-# Backend API URL for the contact form
-# Local: http://localhost:3001 | Production: https://your-api.com
-PUBLIC_API_URL=http://localhost:3001
-
 # Cloudflare Web Analytics beacon token (optional — analytics only in production)
 # Get it: Cloudflare Dashboard → Web Analytics → Sites → Manage site
 PUBLIC_CF_ANALYTICS_TOKEN=
 ```
 
-> The contact form requires a separate Node.js/Express backend running at `PUBLIC_API_URL`.
+**Runtime secrets (contact form)** — read by `src/pages/api/contact.ts` from the
+Cloudflare runtime env, never exposed to the browser:
+
+```bash
+# Local dev — Wrangler reads .dev.vars, not .env
+echo 'RESEND_API_KEY="re_..."' >> .dev.vars
+
+# Production — Worker secrets
+bunx wrangler secret put RESEND_API_KEY
+bunx wrangler secret put EMAIL_FROM
+bunx wrangler secret put EMAIL_TO
+```
+
+> Without `RESEND_API_KEY` set on the Worker, `/api/contact` answers `503` and the
+> contact form silently fails for every visitor. There is no separate backend —
+> the endpoint runs inside the same Worker.
 
 ---
 
@@ -109,6 +128,10 @@ src/
 │       ├── Footer.astro
 │       ├── ProjectCard.astro
 │       └── RepoCard.astro
+├── assets/
+│   └── avatar.webp    # Optimized at build by astro:assets
+├── fonts/
+│   └── JetBrainsMono-*.ttf  # Build-only, for OG image rendering
 ├── i18n/
 │   ├── ui.ts          # All translations (PT / EN / ES)
 │   └── utils.ts       # useTranslations, getAlternateUrls
@@ -121,6 +144,10 @@ src/
 │   ├── index.astro
 │   ├── projetos.astro
 │   ├── 404.astro
+│   ├── api/
+│   │   └── contact.ts # SSR endpoint — validation, rate limit, Resend
+│   ├── og/
+│   │   └── [...route].ts  # Build-time OG images, one per page × language
 │   ├── en/
 │   │   ├── index.astro
 │   │   └── projects.astro
@@ -129,10 +156,8 @@ src/
 │       └── proyectos.astro
 └── styles/
     └── global.css     # Design tokens, animations, Tailwind config
-functions/
-└── api/
-    └── contact.ts     # Cloudflare Pages Function — contact form backend
 public/
+├── images/
 ├── manifest.webmanifest
 ├── favicon.ico
 └── logo.svg
