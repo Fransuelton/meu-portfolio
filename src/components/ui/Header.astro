@@ -53,8 +53,13 @@ const navLinks = [
 
     <!-- Right: theme toggle + language selector + CTA + mobile toggle -->
     <div class="flex items-center gap-2">
-      <ThemeToggle client:load />
-      <LanguageSelector client:load />
+      <!--
+        client:idle: the inline anti-FOUC script in BaseLayout already applied
+        the correct theme before first paint, so these only need to be
+        interactive, not immediate.
+      -->
+      <ThemeToggle client:idle />
+      <LanguageSelector client:idle />
 
       <!-- ⌘K command palette trigger -->
       <button
