@@ -22,10 +22,10 @@ export const featuredProjects: Project[] = [
       es: "Árbol de enlaces personalizable inspirado en LinkTree, desarrollado con Vue.js + TypeScript. Agrega botones para redes sociales, portafolio y contactos con diseño responsivo.",
     },
     image: "https://github.com/Fransuelton/devlinks/raw/main/.github/project.jpg",
-    deployUrl: "https://fransuelton.dev/links/",
+    // deployUrl removido: https://fransuelton.dev/links/ retorna 404.
+    // Reative o deploy e devolva a chave para o botão "Demo" reaparecer.
     repositoryUrl: "https://github.com/Fransuelton/devlinks",
     tech: ["Vue.js", "TypeScript", "Vite"],
-    deployLabel: "Demo",
     featured: true,
   },
   {
@@ -37,10 +37,10 @@ export const featuredProjects: Project[] = [
       es: "Sistema de autenticación completo con Node.js, JWT, MongoDB y verificación de email. Incluye login seguro, rutas protegidas y protección contra fuerza bruta.",
     },
     image: "/images/cover-authjs.webp",
-    deployUrl: "https://auth-js-gmtn.onrender.com",
+    // deployUrl removido: https://auth-js-gmtn.onrender.com retorna 404.
+    // Reative o serviço no Render e devolva a chave para o botão "API" reaparecer.
     repositoryUrl: "https://github.com/Fransuelton/auth-js",
     tech: ["Node.js", "Express", "MongoDB", "JWT"],
-    deployLabel: "API",
     featured: true,
   },
   {
