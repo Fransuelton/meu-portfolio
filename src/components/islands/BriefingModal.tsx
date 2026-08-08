@@ -156,7 +156,7 @@ export default function BriefingModal() {
           </h2>
           <button
             onClick={close}
-            aria-label="Fechar"
+            aria-label={t("modal.close")}
             className="flex items-center justify-center w-8 h-8 rounded-lg text-muted hover:text-text hover:bg-card transition-colors"
           >
             <X size={15} />
@@ -178,7 +178,7 @@ export default function BriefingModal() {
             />
             {errors.name && (
               <p role="alert" className="text-red-400 font-mono text-xs mt-1.5">
-                * Campo obrigatório
+                * {t("modal.err.required")}
               </p>
             )}
           </div>
@@ -213,7 +213,7 @@ export default function BriefingModal() {
             </svg>
             {errors.type && (
               <p role="alert" className="text-red-400 font-mono text-xs mt-1.5">
-                * Campo obrigatório
+                * {t("modal.err.required")}
               </p>
             )}
           </div>
@@ -231,7 +231,7 @@ export default function BriefingModal() {
             />
             {errors.description && (
               <p role="alert" className="text-red-400 font-mono text-xs mt-1.5">
-                * Mínimo 10 caracteres
+                * {t("modal.err.description")}
               </p>
             )}
           </div>

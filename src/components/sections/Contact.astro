@@ -95,7 +95,12 @@ const socialLinks = [
 
         <!-- Contact form island -->
         <div id="contact-form-area">
-          <ContactForm client:load lang={lang} />
+          <!--
+            client:idle rather than client:visible: the form is below the fold,
+            but hydrating only on scroll risks a visitor typing into an
+            unhydrated input and losing it. Idle is early enough to be safe.
+          -->
+          <ContactForm client:idle lang={lang} />
         </div>
       </div>
     </div>
