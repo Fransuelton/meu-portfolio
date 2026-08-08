@@ -1,27 +1,46 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
+import { ui, defaultLang } from "../../i18n/ui";
 
 export const prerender = false;
+
+/** Cloudflare rate limit binding — see `ratelimits` in wrangler.jsonc. */
+interface RateLimiter {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}
 
 interface CloudflareEnv {
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
   EMAIL_TO: string;
+  CONTACT_RATE_LIMIT?: RateLimiter;
 }
 
+type Lang = keyof typeof ui;
+
+/** Field errors carry a translation key; the message is resolved per request. */
 const schema = z.object({
   name: z
     .string()
-    .min(2, "Nome muito curto")
-    .max(100, "Nome muito longo")
-    .regex(/^[\p{L}\s'-]+$/u, "Nome inválido"),
-  email: z.string().email("E-mail inválido").max(255, "E-mail muito longo"),
+    .min(2, "contact.form.err.name")
+    .max(100, "contact.form.err.name")
+    .regex(/^[\p{L}\s'-]+$/u, "contact.form.err.name"),
+  email: z
+    .string()
+    .email("contact.form.err.email")
+    .max(255, "contact.form.err.email"),
   message: z
     .string()
-    .min(10, "Mensagem muito curta")
-    .max(1000, "Mensagem muito longa"),
+    .min(10, "contact.form.err.message")
+    .max(1000, "contact.form.err.message"),
+  lang: z.enum(["pt", "en", "es"]).optional(),
   bot_field: z.string().max(0).optional(),
 });
+
+const translate = (lang: Lang, key: string): string =>
+  (ui[lang] as Record<string, string>)[key] ??
+  (ui[defaultLang] as Record<string, string>)[key] ??
+  key;
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -59,9 +78,11 @@ function notificationHtml(name: string, email: string, message: string) {
 </div></body></html>`;
 }
 
-function confirmationHtml(name: string) {
+function confirmationHtml(name: string, lang: Lang) {
+  const t = (key: string) => translate(lang, key);
+  const htmlLang = lang === "en" ? "en" : lang === "es" ? "es" : "pt-BR";
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${htmlLang}">
 <head><meta charset="UTF-8"><style>
   body{font-family:system-ui,sans-serif;background:#0a0a0a;color:#e4e4e7;margin:0;padding:32px}
   .card{background:#1a1a1a;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:32px;max-width:560px;margin:auto}
@@ -70,9 +91,9 @@ function confirmationHtml(name: string) {
   .footer{margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);font-size:13px;color:#52525b}
 </style></head>
 <body><div class="card">
-  <h2>Oi, ${esc(name)}! <span class="accent">✓</span></h2>
-  <p>Recebi sua mensagem e responderei o mais breve possível, geralmente em até 24 h.</p>
-  <p>Enquanto isso, fique à vontade para me encontrar nas redes:</p>
+  <h2>${esc(t("email.confirm.hi"))}, ${esc(name)}! <span class="accent">✓</span></h2>
+  <p>${esc(t("email.confirm.body"))}</p>
+  <p>${esc(t("email.confirm.socials"))}</p>
   <p>
     <a href="https://github.com/Fransuelton" style="color:#00ff88;margin-right:16px">GitHub</a>
     <a href="https://linkedin.com/in/fransuelton" style="color:#00ff88">LinkedIn</a>
@@ -99,10 +120,6 @@ async function sendEmail(apiKey: string, payload: Record<string, unknown>) {
 export const POST: APIRoute = async (context) => {
   const env = context.locals.runtime?.env as CloudflareEnv | undefined;
 
-  if (!env?.RESEND_API_KEY) {
-    return json({ error: "Serviço de e-mail não configurado." }, 503);
-  }
-
   let raw: unknown;
   try {
     raw = await context.request.json();
@@ -110,10 +127,33 @@ export const POST: APIRoute = async (context) => {
     return json({ error: "Invalid JSON." }, 400);
   }
 
+  // Resolve the language up front so every error below is localized.
+  const rawLang = (raw as { lang?: unknown } | null)?.lang;
+  const lang: Lang = rawLang === "en" || rawLang === "es" ? rawLang : defaultLang;
+  const t = (key: string) => translate(lang, key);
+
+  if (!env?.RESEND_API_KEY) {
+    return json({ error: t("contact.form.err.config") }, 503);
+  }
+
+  // Per-IP throttle: each accepted request sends two emails on our Resend quota.
+  if (env.CONTACT_RATE_LIMIT) {
+    const ip = context.request.headers.get("CF-Connecting-IP") ?? "unknown";
+    const { success } = await env.CONTACT_RATE_LIMIT.limit({ key: ip });
+    if (!success) return json({ error: t("contact.form.err.rate") }, 429);
+  } else {
+    console.warn(
+      "[contact] CONTACT_RATE_LIMIT binding missing — endpoint is unthrottled."
+    );
+  }
+
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
-    const first = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0];
-    return json({ error: first ?? "Dados inválidos." }, 422);
+    const firstKey = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0];
+    return json(
+      { error: firstKey ? t(firstKey) : t("contact.form.error") },
+      422
+    );
   }
 
   const { name, email, message, bot_field } = parsed.data;
@@ -132,13 +172,13 @@ export const POST: APIRoute = async (context) => {
       sendEmail(env.RESEND_API_KEY, {
         from: env.EMAIL_FROM,
         to: [email],
-        subject: "Recebi sua mensagem! — Fransuelton Francisco",
-        html: confirmationHtml(name),
+        subject: t("email.confirm.subject"),
+        html: confirmationHtml(name, lang),
       }),
     ]);
   } catch (err) {
     console.error("[contact] Resend error:", err);
-    return json({ error: "Falha ao enviar. Tente novamente." }, 502);
+    return json({ error: t("contact.form.error") }, 502);
   }
 
   return json({ ok: true });

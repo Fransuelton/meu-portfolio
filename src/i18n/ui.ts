@@ -25,6 +25,8 @@ export const ui = {
     "about.stat.projects":  "Projetos Realizados",
     "about.stat.clients":   "Clientes Satisfeitos",
     "about.stat.focus":     "Foco em Resultado",
+    "about.gh.repos":       "repositórios",
+    "about.gh.followers":   "seguidores",
 
     // Services
     "services.title":       "Serviços",
@@ -60,6 +62,15 @@ export const ui = {
     "contact.form.sending":"Enviando...",
     "contact.form.success":"Mensagem enviada! Retornarei em breve.",
     "contact.form.error":  "Erro ao enviar. Tente novamente.",
+    "contact.form.err.name":    "Nome inválido (mín. 2 caracteres).",
+    "contact.form.err.email":   "E-mail inválido.",
+    "contact.form.err.message": "Mensagem muito curta (mín. 10 caracteres).",
+    "contact.form.err.rate":    "Muitas tentativas. Aguarde um minuto.",
+    "contact.form.err.config":  "Serviço de e-mail indisponível no momento.",
+    "email.confirm.subject":  "Recebi sua mensagem! — Fransuelton Francisco",
+    "email.confirm.hi":       "Oi",
+    "email.confirm.body":     "Recebi sua mensagem e responderei o mais breve possível, geralmente em até 24 h.",
+    "email.confirm.socials":  "Enquanto isso, fique à vontade para me encontrar nas redes:",
 
     // Briefing modal
     "modal.title":           "Solicitar Orçamento",
@@ -75,6 +86,9 @@ export const ui = {
     "modal.whatsapp.desc":   "\n*Descrição:* ",
     "modal.whatsapp.deadline": "\n*Prazo:* ",
     "modal.whatsapp.budget":  "\n*Orçamento:* ",
+    "modal.close":            "Fechar",
+    "modal.err.required":     "Campo obrigatório",
+    "modal.err.description":  "Mínimo 10 caracteres",
 
     // Footer
     "footer.rights":  "Todos os direitos reservados.",
@@ -131,6 +145,8 @@ export const ui = {
     "about.stat.projects":  "Projects Completed",
     "about.stat.clients":   "Satisfied Clients",
     "about.stat.focus":     "Result-Focused",
+    "about.gh.repos":       "repositories",
+    "about.gh.followers":   "followers",
 
     "services.title":       "Services",
     "services.subtitle":    "Tailored solutions for digital businesses.",
@@ -163,6 +179,15 @@ export const ui = {
     "contact.form.sending":"Sending...",
     "contact.form.success":"Message sent! I'll get back to you soon.",
     "contact.form.error":  "Error sending. Please try again.",
+    "contact.form.err.name":    "Invalid name (min. 2 characters).",
+    "contact.form.err.email":   "Invalid email.",
+    "contact.form.err.message": "Message too short (min. 10 characters).",
+    "contact.form.err.rate":    "Too many attempts. Please wait a minute.",
+    "contact.form.err.config":  "Email service is currently unavailable.",
+    "email.confirm.subject":  "Got your message! — Fransuelton Francisco",
+    "email.confirm.hi":       "Hi",
+    "email.confirm.body":     "I received your message and will get back to you as soon as possible, usually within 24 hours.",
+    "email.confirm.socials":  "In the meantime, feel free to find me here:",
 
     "modal.title":           "Request a Quote",
     "modal.name":            "Your name",
@@ -177,6 +202,9 @@ export const ui = {
     "modal.whatsapp.desc":   "\n*Description:* ",
     "modal.whatsapp.deadline": "\n*Deadline:* ",
     "modal.whatsapp.budget":  "\n*Budget:* ",
+    "modal.close":            "Close",
+    "modal.err.required":     "Required field",
+    "modal.err.description":  "Minimum 10 characters",
 
     "footer.rights":  "All rights reserved.",
     "footer.back-top":"Back to top",
@@ -229,6 +257,8 @@ export const ui = {
     "about.stat.projects":  "Proyectos Realizados",
     "about.stat.clients":   "Clientes Satisfechos",
     "about.stat.focus":     "Enfoque en Resultados",
+    "about.gh.repos":       "repositorios",
+    "about.gh.followers":   "seguidores",
 
     "services.title":       "Servicios",
     "services.subtitle":    "Soluciones personalizadas para negocios digitales.",
@@ -261,6 +291,15 @@ export const ui = {
     "contact.form.sending":"Enviando...",
     "contact.form.success":"¡Mensaje enviado! Te responderé pronto.",
     "contact.form.error":  "Error al enviar. Inténtalo de nuevo.",
+    "contact.form.err.name":    "Nombre inválido (mín. 2 caracteres).",
+    "contact.form.err.email":   "Correo electrónico inválido.",
+    "contact.form.err.message": "Mensaje demasiado corto (mín. 10 caracteres).",
+    "contact.form.err.rate":    "Demasiados intentos. Espera un minuto.",
+    "contact.form.err.config":  "El servicio de correo no está disponible.",
+    "email.confirm.subject":  "¡Recibí tu mensaje! — Fransuelton Francisco",
+    "email.confirm.hi":       "Hola",
+    "email.confirm.body":     "Recibí tu mensaje y te responderé lo antes posible, normalmente en menos de 24 h.",
+    "email.confirm.socials":  "Mientras tanto, puedes encontrarme aquí:",
 
     "modal.title":           "Solicitar Presupuesto",
     "modal.name":            "Tu nombre",
@@ -275,6 +314,9 @@ export const ui = {
     "modal.whatsapp.desc":   "\n*Descripción:* ",
     "modal.whatsapp.deadline": "\n*Plazo:* ",
     "modal.whatsapp.budget":  "\n*Presupuesto:* ",
+    "modal.close":            "Cerrar",
+    "modal.err.required":     "Campo obligatorio",
+    "modal.err.description":  "Mínimo 10 caracteres",
 
     "footer.rights":  "Todos los derechos reservados.",
     "footer.back-top":"Volver arriba",

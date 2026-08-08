@@ -15,8 +15,6 @@ interface Props {
   lang: Lang;
 }
 
-const API_URL = (import.meta.env.PUBLIC_API_URL as string | undefined) ?? "";
-
 export default function ContactForm({ lang }: Props) {
   const t = (key: string): string =>
     (ui[lang] as Record<string, string>)[key] ??
@@ -32,9 +30,9 @@ export default function ContactForm({ lang }: Props) {
 
   const validate = (): boolean => {
     const errs: FieldErrors = {};
-    if (name.trim().length < 2)         errs.name    = "min 2 chars";
-    if (!/^\S+@\S+\.\S+$/.test(email))  errs.email   = "invalid";
-    if (message.trim().length < 10)     errs.message  = "min 10 chars";
+    if (name.trim().length < 2)         errs.name    = t("contact.form.err.name");
+    if (!/^\S+@\S+\.\S+$/.test(email))  errs.email   = t("contact.form.err.email");
+    if (message.trim().length < 10)     errs.message = t("contact.form.err.message");
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -46,13 +44,14 @@ export default function ContactForm({ lang }: Props) {
     setStatus("loading");
 
     try {
-      const res = await fetch(`${API_URL}/api/contact`, {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name:      name.trim(),
           email:     email.trim(),
           message:   message.trim(),
+          lang,
           bot_field: botField,
         }),
       });
@@ -63,7 +62,7 @@ export default function ContactForm({ lang }: Props) {
         window.toast?.(t("contact.form.success"), "success");
       } else if (res.status === 429) {
         setStatus("idle");
-        window.toast?.("Muitas tentativas. Aguarde 15 min.", "error");
+        window.toast?.(t("contact.form.err.rate"), "error");
       } else {
         const body = await res.json().catch(() => ({}));
         setStatus("idle");
@@ -113,7 +112,7 @@ export default function ContactForm({ lang }: Props) {
         />
         {errors.name && (
           <p id="cf-name-err" role="alert" className="font-mono text-xs text-red-400 mt-1.5">
-            * {t("contact.form.name")} obrigatório (mín. 2 caracteres)
+            * {errors.name}
           </p>
         )}
       </div>
@@ -136,7 +135,7 @@ export default function ContactForm({ lang }: Props) {
         />
         {errors.email && (
           <p id="cf-email-err" role="alert" className="font-mono text-xs text-red-400 mt-1.5">
-            * E-mail inválido
+            * {errors.email}
           </p>
         )}
       </div>
@@ -159,7 +158,7 @@ export default function ContactForm({ lang }: Props) {
         <div className="flex items-start justify-between mt-1.5">
           {errors.message ? (
             <p id="cf-msg-err" role="alert" className="font-mono text-xs text-red-400">
-              * Mínimo 10 caracteres
+              * {errors.message}
             </p>
           ) : (
             <span />
