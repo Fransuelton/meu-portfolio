@@ -24,6 +24,12 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      // canvaskit-wasm is CJS and resolves its .wasm via __dirname, which breaks
+      // once Vite inlines it into the ESM worker bundle. Keep it external: the OG
+      // route is prerendered, so it only ever runs in Node at build time.
+      external: ["canvaskit-wasm"],
+    },
   },
 
   i18n: {
@@ -34,5 +40,7 @@ export default defineConfig({
     },
   },
 
-  adapter: cloudflare()
+  // `compile` runs sharp at build time on prerendered pages (Cloudflare has no
+  // sharp at runtime). Every page using <Image> here is prerendered.
+  adapter: cloudflare({ imageService: "compile" })
 });
